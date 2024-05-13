@@ -79,17 +79,19 @@ class AnalysisImageActivity : AppCompatActivity() {
 
             val requestBody = """
             {
-            "model": "gpt-4-turbo",
-            "max_tokens": 2000,
-            "temperature": 0,
-            "messages": [
+                "model": "gpt-4-turbo",
+                "max_tokens": 2000,
+                "temperature": 0,
+                "messages": [
                     {
-                        "role": "system",
-                        "content": "Describe this picture:"
+                       "role": "system",
+                       "content": "You are a professional analyst"
                     },
                     {
                         "role": "user",
                         "content": "$question"
+                    }
+                ]
             }
         """.trimIndent()
 
