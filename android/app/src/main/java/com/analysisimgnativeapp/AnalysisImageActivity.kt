@@ -29,9 +29,15 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class AnalysisImageActivity : AppCompatActivity() {
-     private val client = OkHttpClient()
+     private val client: OkHttpClient = OkHttpClient.Builder()
+         .connectTimeout(50, TimeUnit.SECONDS)
+         .writeTimeout(50, TimeUnit.SECONDS)
+         .readTimeout(50, TimeUnit.SECONDS)
+         .callTimeout(50, TimeUnit.SECONDS)
+         .build()
      private lateinit var captureIV : ImageView
      private lateinit var imageUrl : Uri
 
@@ -46,6 +52,7 @@ class AnalysisImageActivity : AppCompatActivity() {
         setContentView(R.layout.activity_analysis_image)
 
         imageUrl = createImageUri()
+        println("createImageUri:" + imageUrl)
         captureIV = findViewById(R.id.captureImageView)
         val captureImgBtn = findViewById<Button>(R.id.captureImgBtn)
         captureImgBtn.setOnClickListener{
@@ -74,6 +81,7 @@ class AnalysisImageActivity : AppCompatActivity() {
          return FileProvider.getUriForFile(this, "com.analysisimgnativeapp.FileProvider", image)
      }
         fun getResponse (question: String, callback: (String) -> Unit){
+            println("imageUrl::" + imageUrl)
             val apiKey = ""
             val url = "https://api.openai.com/v1/chat/completions"
 
@@ -81,7 +89,6 @@ class AnalysisImageActivity : AppCompatActivity() {
             {
                 "model": "gpt-4-turbo",
                 "max_tokens": 2000,
-                "temperature": 0,
                 "messages": [
                     {
                        "role": "system",
@@ -89,7 +96,18 @@ class AnalysisImageActivity : AppCompatActivity() {
                     },
                     {
                         "role": "user",
-                        "content": "$question"
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Describe this picture:"
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": "https://i.pinimg.com/736x/e1/11/76/e11176f2caf121fa8dbd8c6a6b660efd.jpg"
+                                }
+                            } 
+                       ] 
                     }
                 ]
             }
@@ -115,7 +133,7 @@ class AnalysisImageActivity : AppCompatActivity() {
                 .url(url)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer $apiKey")
-                .addHeader("Organization_ID", "org-TrMYzGfE6CEz4NLanWyeictN")
+                .addHeader("OpenAI-Organization", "org-TrMYzGfE6CEz4NLanWyeictN")
                 .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
                 .build()
 
